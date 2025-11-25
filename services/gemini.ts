@@ -2,7 +2,12 @@ import { GoogleGenAI } from "@google/genai";
 import { ComfyTheme } from "../types";
 
 export const generateMatrixTheme = async (inputTheme: ComfyTheme): Promise<ComfyTheme> => {
-  // Check for API key presence at runtime
+  /* 
+   * SECURITY CHECK:
+   * The API key is accessed exclusively via process.env.API_KEY.
+   * It is NOT hardcoded in the source code.
+   * This ensures the key is not exposed when sharing the code.
+   */
   if (!process.env.API_KEY) {
     throw new Error("API Key is missing. AI features require a valid API_KEY environment variable.");
   }
@@ -50,8 +55,9 @@ export const generateMatrixTheme = async (inputTheme: ComfyTheme): Promise<Comfy
     if (!text) throw new Error("No response from Gemini");
 
     return JSON.parse(text) as ComfyTheme;
-  } catch (error) {
-    console.error("Gemini API Error:", error);
+  } catch (error: any) {
+    // Log only the message to avoid leaking full request objects with keys in console
+    console.error("Gemini Theme Generation Failed:", error.message || "Unknown error");
     throw error;
   }
 };
